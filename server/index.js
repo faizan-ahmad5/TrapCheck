@@ -81,8 +81,15 @@ app.get("/api/health", (req, res) => {
 // Auth routes
 app.use("/api/auth", require("./routes/auth"));
 
+
 // Phishing checker endpoint
 app.use("/api/check-url", require("./routes/checkUrl"));
+
+// Reports endpoints
+app.use("/api/reports", require("./routes/reports"));
+
+// Articles endpoints
+app.use("/api/articles", require("./routes/articles"));
 
 // Error handler (no stack traces to client)
 app.use((err, req, res, next) => {
