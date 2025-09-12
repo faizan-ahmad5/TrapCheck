@@ -78,7 +78,8 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// ...routes will be added here...
+// Auth routes
+app.use("/api/auth", require("./routes/auth"));
 
 // Error handler (no stack traces to client)
 app.use((err, req, res, next) => {
