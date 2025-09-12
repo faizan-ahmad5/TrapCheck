@@ -81,7 +81,6 @@ app.get("/api/health", (req, res) => {
 // Auth routes
 app.use("/api/auth", require("./routes/auth"));
 
-
 // Phishing checker endpoint
 app.use("/api/check-url", require("./routes/checkUrl"));
 

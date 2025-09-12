@@ -1,5 +1,5 @@
-const Report = require('../models/Report');
-const { validationResult, body } = require('express-validator');
+const Report = require("../models/Report");
+const { validationResult, body } = require("express-validator");
 
 // Submit a phishing report (user or guest)
 exports.submitReport = async (req, res) => {
@@ -13,15 +13,15 @@ exports.submitReport = async (req, res) => {
       reporter: req.user ? req.user._id : undefined,
       reporterEmail: req.user ? req.user.email : req.body.reporterEmail,
       ip: req.ip,
-      userAgent: req.get('user-agent'),
+      userAgent: req.get("user-agent"),
       url,
       rawText,
-      status: 'open',
+      status: "open",
     });
     await report.save();
-    res.status(201).json({ message: 'Report submitted', report });
+    res.status(201).json({ message: "Report submitted", report });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -31,17 +31,17 @@ exports.getMyReports = async (req, res) => {
     const reports = await Report.find({ reporter: req.user._id });
     res.json(reports);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 // Admin: list all reports
 exports.listReports = async (req, res) => {
   try {
-    const reports = await Report.find().populate('reporter', 'email name');
+    const reports = await Report.find().populate("reporter", "email name");
     res.json(reports);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -49,12 +49,12 @@ exports.listReports = async (req, res) => {
 exports.updateReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
-    if (!report) return res.status(404).json({ error: 'Report not found' });
+    if (!report) return res.status(404).json({ error: "Report not found" });
     report.status = req.body.status || report.status;
     report.verdict = req.body.verdict || report.verdict;
     await report.save();
-    res.json({ message: 'Report updated', report });
+    res.json({ message: "Report updated", report });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
