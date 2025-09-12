@@ -1,5 +1,6 @@
 # Project/test documentation
 AUTH_TEST.md
+AUTH_CURL.md
 *.test.md
 *.doc.md
 # Node modules
