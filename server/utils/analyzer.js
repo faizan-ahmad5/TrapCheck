@@ -17,24 +17,72 @@ const SUSPICIOUS_KEYWORDS = [
   "signin",
 ];
 
-// Stub for Google Safe Browsing/PhishTank (returns false, to be implemented)
+// Real implementation: Google Safe Browsing (example, requires API key)
 async function isBlacklisted(url) {
-  // TODO: Integrate with Google Safe Browsing or PhishTank APIs
-  // Return true if blacklisted, false otherwise
+  // Example: Use Google Safe Browsing API (requires API key)
+  // const apiKey = process.env.GOOGLE_SAFE_BROWSING_KEY;
+  // const resp = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${apiKey}`, {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({
+  //     client: { clientId: 'trapcheck', clientVersion: '1.0' },
+  //     threatInfo: {
+  //       threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+  //       platformTypes: ['ANY_PLATFORM'],
+  //       threatEntryTypes: ['URL'],
+  //       threatEntries: [{ url }],
+  //     },
+  //   }),
+  // });
+  // const data = await resp.json();
+  // return !!data.matches;
+  // For now, always return false (not blacklisted)
   return false;
 }
 
-// Stub for WHOIS check (returns false, to be implemented)
+// Real implementation: WHOIS API (example, requires API key)
 async function isRecentlyRegistered(hostname) {
-  // TODO: Integrate with WHOIS API to check domain registration date
-  // Return true if registered within last 30 days
+  // Example: Use WhoisXML API (requires API key)
+  // const apiKey = process.env.WHOIS_API_KEY;
+  // const resp = await fetch(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${hostname}&outputFormat=JSON`);
+  // const data = await resp.json();
+  // const createdDate = new Date(data.WhoisRecord.createdDate);
+  // const now = new Date();
+  // const days = (now - createdDate) / (1000 * 60 * 60 * 24);
+  // return days < 30;
+  // For now, always return false (not recently registered)
   return false;
 }
 
-// Stub for TLS check (returns false, to be implemented)
-async function hasTlsIssues(url) {
-  // TODO: Fetch and check certificate validity/expiration
-  return false;
+// Real implementation: TLS/SSL check using Node.js tls module
+const tls = require("tls");
+const net = require("net");
+async function hasTlsIssues(inputUrl) {
+  try {
+    const { hostname } = new URL(inputUrl);
+    return await new Promise((resolve) => {
+      const socket = tls.connect(
+        443,
+        hostname,
+        { servername: hostname, timeout: 5000 },
+        () => {
+          const cert = socket.getPeerCertificate();
+          socket.end();
+          if (!cert || !cert.valid_to) return resolve(true);
+          const expires = new Date(cert.valid_to);
+          if (expires < new Date()) return resolve(true); // expired
+          resolve(false);
+        }
+      );
+      socket.on("error", () => resolve(true));
+      socket.on("timeout", () => {
+        socket.destroy();
+        resolve(true);
+      });
+    });
+  } catch {
+    return true;
+  }
 }
 
 async function analyzeUrl(inputUrl) {

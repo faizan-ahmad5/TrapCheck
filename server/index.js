@@ -90,7 +90,13 @@ app.use("/api/check-url", require("./routes/checkUrl"));
 // Reports endpoints
 app.use("/api/reports", require("./routes/reports"));
 
+// Users endpoints
+app.use("/api/users", require("./routes/users"));
+
 // Articles endpoints
+
+// Notifications endpoints
+app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/articles", require("./routes/articles"));
 
 // Error handler (no stack traces to client)

@@ -39,4 +39,11 @@ router.post(
   articleController.publishNow
 );
 
+// Admin: delete article
+router.delete(
+  "/:id",
+  auth("admin"),
+  require("../controllers/articleController").deleteArticle
+);
+
 module.exports = router;

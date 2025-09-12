@@ -1,3 +1,16 @@
+// Admin: delete article
+exports.deleteArticle = async (req, res) => {
+  try {
+    const article = await Article.findByIdAndDelete(req.params.id);
+    if (!article) return res.status(404).json({ error: "Article not found" });
+    res.json({
+      message: "Article deleted",
+      article: { _id: article._id, title: article.title },
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 // Admin: list all articles (any status)
 exports.listAll = async (req, res) => {
   try {
@@ -71,9 +84,25 @@ exports.updateArticle = async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
     if (!article) return res.status(404).json({ error: "Article not found" });
-    article.status = req.body.status || article.status;
+    const newStatus = req.body.status || article.status;
+    article.status = newStatus;
     article.updatedAt = new Date();
     await article.save();
+
+    // Send notification to author if status changed to published or rejected
+    if (
+      (newStatus === "published" || newStatus === "rejected") &&
+      article.author
+    ) {
+      const Notification = require("../models/Notification");
+      await Notification.create({
+        user: article.author,
+        type: "article_status",
+        article: article._id,
+        status: newStatus,
+      });
+    }
+
     res.json({ message: "Article updated", article });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
