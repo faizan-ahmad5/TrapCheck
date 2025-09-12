@@ -35,11 +35,14 @@ app.use(helmet());
 app.use(express.json({ limit: "10kb" }));
 
 // CORS config (whitelist frontend origin)
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -65,10 +68,10 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // MongoDB connection
+
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  .connect(process.env.MONGODB_URI, {
+    // useNewUrlParser and useUnifiedTopology are not needed in Mongoose 6+
   })
   .then(() => logger.info("MongoDB connected"))
   .catch((err) => logger.error("MongoDB connection error:", err));

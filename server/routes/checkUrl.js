@@ -24,7 +24,7 @@ router.post(
     body("url").optional().isURL().withMessage("Valid URL required"),
     body("rawText").optional().isString().trim().isLength({ max: 2000 }),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -34,8 +34,12 @@ router.post(
       return res.status(400).json({ error: "url or rawText required" });
     }
     // For now, only analyze url
-    const result = analyzeUrl(url || "");
-    res.json(result);
+    try {
+      const result = await analyzeUrl(url || "");
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to analyze URL" });
+    }
   }
 );
 
